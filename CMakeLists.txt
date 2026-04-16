@@ -140,10 +140,5 @@ set(Zaero-Header
     )
 
 # Build the zaero dynamic library
-add_library(game SHARED ${Zaero-Source} ${Zaero-Header})
-set_target_properties(game PROPERTIES
-    PREFIX ""
-    LIBRARY_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/Debug
-    LIBRARY_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/Release
-)
-target_link_libraries(game ${ZaeroLinkerFlags})
+add_library(zaero SHARED ${Zaero-Source} ${Zaero-Header})
+target_link_libraries(zaero ${ZaeroLinkerFlags})
