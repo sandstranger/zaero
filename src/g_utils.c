@@ -1,9 +1,15 @@
-// g_utils.c -- misc utility functions for game module
+/* =======================================================================
+ *
+ * Misc. utility functions for the game logic.
+ *
+ * =======================================================================
+ */
 
 #include "header/local.h"
 
 
-void G_ProjectSource (vec3_t point, vec3_t distance, vec3_t forward, vec3_t right, vec3_t result)
+void
+G_ProjectSource(const vec3_t point, const vec3_t distance, const vec3_t forward, const vec3_t right, vec3_t result)
 {
 	result[0] = point[0] + forward[0] * distance[0] + right[0] * distance[1];
 	result[1] = point[1] + forward[1] * distance[0] + right[1] * distance[1];
@@ -23,14 +29,19 @@ NULL will be returned if the end of the list is reached.
 
 =============
 */
-edict_t *G_Find (edict_t *from, int fieldofs, char *match)
+edict_t *
+G_Find(edict_t *from, int fieldofs, const char *match)
 {
-	char	*s;
+	const char *s;
 
 	if (!from)
+	{
 		from = g_edicts;
+	}
 	else
+	{
 		from++;
+	}
 
 	if (!match)
 	{
@@ -61,7 +72,8 @@ Returns entities that have origins within a spherical area
 findradius (origin, radius)
 =================
 */
-edict_t *findradius (edict_t *from, vec3_t org, float rad)
+edict_t *
+findradius(edict_t *from, const vec3_t org, float rad)
 {
 	vec3_t	eorg;
 	int		j;
@@ -116,7 +128,7 @@ edict_t *G_PickTarget (char *targetname)
 
 	while(1)
 	{
-		ent = G_Find (ent, FOFS(targetname), targetname);
+		ent = G_Find(ent, FOFS(targetname), targetname);
 		if (!ent)
 			break;
 		choice[num_choices++] = ent;
@@ -130,20 +142,19 @@ edict_t *G_PickTarget (char *targetname)
 		return NULL;
 	}
 
-	return choice[rand() % num_choices];
+	return choice[randk() % num_choices];
 }
 
-
-
-void Think_Delay (edict_t *ent)
+void
+Think_Delay(edict_t *ent)
 {
 	if (!ent)
 	{
 		return;
 	}
 
-	G_UseTargets (ent, ent->activator);
-	G_FreeEdict (ent);
+	G_UseTargets(ent, ent->activator);
+	G_FreeEdict(ent);
 }
 
 /*
@@ -162,7 +173,7 @@ match (string)self.target and call their .use function
 
 ==============================
 */
-void G_UseTargets (edict_t *ent, edict_t *activator)
+void G_UseTargets(edict_t *ent, edict_t *activator)
 {
 	edict_t		*t;
 
@@ -182,8 +193,6 @@ void G_UseTargets (edict_t *ent, edict_t *activator)
 		t->nextthink = level.time + ent->delay;
 		t->think = Think_Delay;
 		t->activator = activator;
-		if (!activator)
-			gi.dprintf ("Think_Delay with no activator\n");
 		t->message = ent->message;
 		t->target = ent->target;
 		t->killtarget = ent->killtarget;
@@ -198,9 +207,9 @@ void G_UseTargets (edict_t *ent, edict_t *activator)
 	{
 		gi.centerprintf (activator, "%s", ent->message);
 		if (ent->noise_index)
-			gi.sound (activator, CHAN_AUTO, ent->noise_index, 1, ATTN_NORM, 0);
+			gi.sound(activator, CHAN_AUTO, ent->noise_index, 1, ATTN_NORM, 0);
 		else
-			gi.sound (activator, CHAN_AUTO, gi.soundindex ("misc/talk1.wav"), 1, ATTN_NORM, 0);
+			gi.sound(activator, CHAN_AUTO, gi.soundindex("misc/talk1.wav"), 1, ATTN_NORM, 0);
 	}
 
 	//
@@ -209,9 +218,9 @@ void G_UseTargets (edict_t *ent, edict_t *activator)
 	if (ent->killtarget)
 	{
 		t = NULL;
-		while ((t = G_Find (t, FOFS(targetname), ent->killtarget)))
+		while ((t = G_Find(t, FOFS(targetname), ent->killtarget)))
 		{
-			G_FreeEdict (t);
+			G_FreeEdict(t);
 			if (!ent->inuse)
 			{
 				gi.dprintf("entity was removed while using killtargets\n");
@@ -226,7 +235,7 @@ void G_UseTargets (edict_t *ent, edict_t *activator)
 	if (ent->target)
 	{
 		t = NULL;
-		while ((t = G_Find (t, FOFS(targetname), ent->target)))
+		while ((t = G_Find(t, FOFS(targetname), ent->target)))
 		{
 			// doors fire area portals in a specific way
 			if (!Q_stricmp(t->classname, "func_areaportal") &&
@@ -302,80 +311,90 @@ char	*vtos (vec3_t v)
 	return s;
 }
 
+vec3_t VEC_UP = {0, -1, 0};
+vec3_t MOVEDIR_UP = {0, 0, 1};
+vec3_t VEC_DOWN = {0, -2, 0};
+vec3_t MOVEDIR_DOWN = {0, 0, -1};
 
-vec3_t VEC_UP		= {0, -1, 0};
-vec3_t MOVEDIR_UP	= {0, 0, 1};
-vec3_t VEC_DOWN		= {0, -2, 0};
-vec3_t MOVEDIR_DOWN	= {0, 0, -1};
-
-void G_SetMovedir (vec3_t angles, vec3_t movedir)
+void
+G_SetMovedir(vec3_t angles, vec3_t movedir)
 {
-	if (VectorCompare (angles, VEC_UP))
+	if (VectorCompare(angles, VEC_UP))
 	{
-		VectorCopy (MOVEDIR_UP, movedir);
+		VectorCopy(MOVEDIR_UP, movedir);
 	}
-	else if (VectorCompare (angles, VEC_DOWN))
+	else if (VectorCompare(angles, VEC_DOWN))
 	{
-		VectorCopy (MOVEDIR_DOWN, movedir);
+		VectorCopy(MOVEDIR_DOWN, movedir);
 	}
 	else
 	{
-		AngleVectors (angles, movedir, NULL, NULL);
+		AngleVectors(angles, movedir, NULL, NULL);
 	}
 
-	VectorClear (angles);
+	VectorClear(angles);
 }
 
-
-float vectoyaw (vec3_t vec)
+float
+vectoyaw(vec3_t vec)
 {
-	float	yaw;
+	float yaw;
 
-	if (/*vec[YAW] == 0 &&*/ vec[PITCH] == 0) 
+	if (vec[PITCH] == 0)
 	{
 		yaw = 0;
+
 		if (vec[YAW] > 0)
+		{
 			yaw = 90;
+		}
 		else if (vec[YAW] < 0)
+		{
 			yaw = -90;
-	} 
+		}
+	}
 	else
 	{
-		yaw = (int) (atan2(vec[YAW], vec[PITCH]) * 180 / M_PI);
+		yaw = (int)(atan2(vec[YAW], vec[PITCH]) * 180 / M_PI);
+
 		if (yaw < 0)
+		{
 			yaw += 360;
+		}
 	}
 
 	return yaw;
 }
 
 
-void vectoangles (vec3_t value1, vec3_t angles)
+void
+vectoangles(const vec3_t value, vec3_t angles)
 {
-	float	forward;
 	float	yaw, pitch;
 
-	if (value1[1] == 0 && value1[0] == 0)
+	if (value[1] == 0 && value[0] == 0)
 	{
 		yaw = 0;
-		if (value1[2] > 0)
+		if (value[2] > 0)
 			pitch = 90;
 		else
 			pitch = 270;
 	}
 	else
 	{
-		if (value1[0])
-			yaw = (int) (atan2(value1[1], value1[0]) * 180 / M_PI);
-		else if (value1[1] > 0)
+		float	forward;
+
+		if (value[0])
+			yaw = (int) (atan2(value[1], value[0]) * 180 / M_PI);
+		else if (value[1] > 0)
 			yaw = 90;
 		else
 			yaw = -90;
 		if (yaw < 0)
 			yaw += 360;
 
-		forward = sqrt (value1[0]*value1[0] + value1[1]*value1[1]);
-		pitch = (int) (atan2(value1[2], forward) * 180 / M_PI);
+		forward = sqrt (value[0]*value[0] + value[1]*value[1]);
+		pitch = (int) (atan2(value[2], forward) * 180 / M_PI);
 		if (pitch < 0)
 			pitch += 360;
 	}
@@ -385,7 +404,8 @@ void vectoangles (vec3_t value1, vec3_t angles)
 	angles[ROLL] = 0;
 }
 
-char *G_CopyString (char *in)
+char *
+G_CopyString (const char *in)
 {
 	char	*out;
 
@@ -451,7 +471,7 @@ G_FreeEdict
 Marks the edict as free
 =================
 */
-void G_FreeEdict (edict_t *ed)
+void G_FreeEdict(edict_t *ed)
 {
 	if (!ed)
 	{
@@ -481,8 +501,8 @@ G_TouchTriggers
 */
 void	G_TouchTriggers (edict_t *ent)
 {
-	int			i, num;
-	edict_t		*touch[MAX_EDICTS], *hit;
+	int i, num;
+	edict_t *touch[MAX_EDICTS];
 
 	if (!ent)
 	{
@@ -500,6 +520,8 @@ void	G_TouchTriggers (edict_t *ent)
 	// list removed before we get to it (killtriggered)
 	for (i=0 ; i<num ; i++)
 	{
+		edict_t *hit;
+
 		hit = touch[i];
 		if (!hit->inuse)
 			continue;
@@ -519,8 +541,8 @@ to force all entities it covers to immediately touch it
 */
 void	G_TouchSolids (edict_t *ent)
 {
-	int			i, num;
-	edict_t		*touch[MAX_EDICTS], *hit;
+	int i, num;
+	edict_t *touch[MAX_EDICTS];
 
 	if (!ent)
 	{
@@ -534,6 +556,8 @@ void	G_TouchSolids (edict_t *ent)
 	// list removed before we get to it (killtriggered)
 	for (i=0 ; i<num ; i++)
 	{
+		edict_t *hit;
+
 		hit = touch[i];
 		if (!hit->inuse)
 			continue;
@@ -545,25 +569,12 @@ void	G_TouchSolids (edict_t *ent)
 }
 
 /*
-==============================================================================
-
-Kill box
-
-==============================================================================
-*/
-
-/*
-=================
-KillBox
-
-Kills all entities that would touch the proposed new positioning
-of ent.  Ent should be unlinked before calling this!
-=================
-*/
-qboolean KillBox (edict_t *ent)
+ * Kills all entities that would touch the proposed new positioning
+ * of ent. Ent should be unlinked before calling this!
+ */
+qboolean
+KillBox(edict_t *ent)
 {
-	trace_t		tr;
-
 	if (!ent)
 	{
 		return false;
@@ -571,33 +582,40 @@ qboolean KillBox (edict_t *ent)
 
 	while (1)
 	{
-		tr = gi.trace (ent->s.origin, ent->mins, ent->maxs, ent->s.origin, NULL, MASK_PLAYERSOLID);
+		trace_t tr;
+
+		tr = gi.trace(ent->s.origin, ent->mins, ent->maxs, ent->s.origin,
+				NULL, MASK_PLAYERSOLID);
+
 		if (!tr.ent)
+		{
 			break;
+		}
 
-		// nail it
-		T_Damage (tr.ent, ent, ent, vec3_origin, ent->s.origin, vec3_origin, 100000, 0, DAMAGE_NO_PROTECTION, MOD_TELEFRAG);
+		/* nail it */
+		T_Damage(tr.ent, ent, ent, vec3_origin, ent->s.origin, vec3_origin,
+				100000, 0, DAMAGE_NO_PROTECTION, MOD_TELEFRAG);
 
-		// if we didn't kill it, fail
+		/* if we didn't kill it, fail */
 		if (tr.ent->solid)
+		{
 			return false;
+		}
 	}
 
-	return true;		// all clear
+	return true; /* all clear */
 }
 
 /*
 =================
 MonsterKillBox
 
-Kills all entities except players that would touch the proposed new 
+Kills all entities except players that would touch the proposed new
 positioning of ent.  Ent should be unlinked before calling this!
 =================
 */
 qboolean MonsterKillBox (edict_t *ent)
 {
-	trace_t		tr;
-
 	if (!ent)
 	{
 		return false;
@@ -605,14 +623,16 @@ qboolean MonsterKillBox (edict_t *ent)
 
 	while (1)
 	{
-		tr = gi.trace (ent->s.origin, ent->mins, ent->maxs, ent->s.origin, NULL, MASK_PLAYERSOLID);
+		trace_t tr;
+
+		tr = gi.trace(ent->s.origin, ent->mins, ent->maxs, ent->s.origin, NULL, MASK_PLAYERSOLID);
 		if (!tr.ent)
 			break;
 
 		if(!((ent->svflags & SVF_MONSTER) && tr.ent->client && tr.ent->health))
 		{
 			// nail it
-			T_Damage (tr.ent, ent, ent, vec3_origin, ent->s.origin, vec3_origin, 100000, 0, DAMAGE_NO_PROTECTION, MOD_TELEFRAG);
+			T_Damage(tr.ent, ent, ent, vec3_origin, ent->s.origin, vec3_origin, 100000, 0, DAMAGE_NO_PROTECTION, MOD_TELEFRAG);
 		}
 
 		// if we didn't kill it, fail
@@ -627,14 +647,12 @@ qboolean MonsterKillBox (edict_t *ent)
 =================
 MonsterPlayerKillBox
 
-Kills all entities except players that would touch the proposed new 
+Kills all entities except players that would touch the proposed new
 positioning of ent.  Ent should be unlinked before calling this!
 =================
 */
 qboolean MonsterPlayerKillBox (edict_t *ent)
 {
-	trace_t		tr;
-
 	if (!ent)
 	{
 		return false;
@@ -642,20 +660,22 @@ qboolean MonsterPlayerKillBox (edict_t *ent)
 
 	while (1)
 	{
-		tr = gi.trace (ent->s.origin, ent->mins, ent->maxs, ent->s.origin, ent, MASK_PLAYERSOLID);
+		trace_t		tr;
+
+		tr = gi.trace(ent->s.origin, ent->mins, ent->maxs, ent->s.origin, ent, MASK_PLAYERSOLID);
 		if (!tr.ent)
 			break;
 
 		if((ent->svflags & SVF_MONSTER) && tr.ent->client && tr.ent->health)
 		{
 			// nail myself
-			T_Damage (ent, ent, ent, vec3_origin, ent->s.origin, vec3_origin, 100000, 0, DAMAGE_NO_PROTECTION, MOD_TELEFRAG);
+			T_Damage(ent, ent, ent, vec3_origin, ent->s.origin, vec3_origin, 100000, 0, DAMAGE_NO_PROTECTION, MOD_TELEFRAG);
 			return true;
 		}
 		else
 		{
 			// nail it
-			T_Damage (tr.ent, ent, ent, vec3_origin, ent->s.origin, vec3_origin, 100000, 0, DAMAGE_NO_PROTECTION, MOD_TELEFRAG);
+			T_Damage(tr.ent, ent, ent, vec3_origin, ent->s.origin, vec3_origin, 100000, 0, DAMAGE_NO_PROTECTION, MOD_TELEFRAG);
 		}
 
 		// if we didn't kill it, fail
@@ -663,6 +683,5 @@ qboolean MonsterPlayerKillBox (edict_t *ent)
 		return false;
 	}
 
-	return true;		// all clear
+	return true; /* all clear */
 }
-

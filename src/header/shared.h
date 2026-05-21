@@ -83,9 +83,7 @@ typedef unsigned char byte;
  #define PRINTF_ATTR(FMT, VARGS) __attribute__((format(printf, FMT , VARGS )))
 #endif
 
-/* */
 /* per-level limits */
-/* */
 #define MAX_CLIENTS 256             /* absolute limit */
 #define MAX_EDICTS 1024             /* must change protocol to increase more */
 #define MAX_LIGHTSTYLES 256
@@ -151,40 +149,42 @@ extern vec3_t vec3_origin;
 #define Q_ftol(f) (long)(f)
 
 #define DotProduct(x, y) (x[0] * y[0] + x[1] * y[1] + x[2] * y[2])
-#define VectorSubtract(a, b, c) (c[0] = a[0] - b[0], c[1] = a[1] - b[1], c[2] =	\
-									 a[2] - b[2])
-#define VectorAdd(a, b, c) (c[0] = a[0] + b[0], c[1] = a[1] + b[1], c[2] = \
-								a[2] + b[2])
+#define VectorSubtract(a, b, c)	\
+	(c[0] = a[0] - b[0], c[1] = a[1] - b[1], c[2] =	\
+	 a[2] - b[2])
+#define VectorAdd(a, b, c) \
+	(c[0] = a[0] + b[0], c[1] = a[1] + b[1], c[2] =	\
+	 a[2] + b[2])
 #define VectorCopy(a, b) (b[0] = a[0], b[1] = a[1], b[2] = a[2])
 #define VectorClear(a) (a[0] = a[1] = a[2] = 0)
 #define VectorNegate(a, b) (b[0] = -a[0], b[1] = -a[1], b[2] = -a[2])
 #define VectorSet(v, x, y, z) (v[0] = (x), v[1] = (y), v[2] = (z))
 
-void VectorMA(vec3_t veca, float scale, vec3_t vecb, vec3_t vecc);
+void VectorMA(const vec3_t veca, float scale, const vec3_t vecb, vec3_t vecc);
 
 /* just in case you do't want to use the macros */
-vec_t _DotProduct(vec3_t v1, vec3_t v2);
-void _VectorSubtract(vec3_t veca, vec3_t vecb, vec3_t out);
-void _VectorAdd(vec3_t veca, vec3_t vecb, vec3_t out);
-void _VectorCopy(vec3_t in, vec3_t out);
+vec_t _DotProduct(const vec3_t v1, const vec3_t v2);
+void _VectorSubtract(const vec3_t veca, const vec3_t vecb, vec3_t out);
+void _VectorAdd(const vec3_t veca, const vec3_t vecb, vec3_t out);
+void _VectorCopy(const vec3_t in, vec3_t out);
 
 void ClearBounds(vec3_t mins, vec3_t maxs);
-void AddPointToBounds(vec3_t v, vec3_t mins, vec3_t maxs);
-int VectorCompare(vec3_t v1, vec3_t v2);
-vec_t VectorLength(vec3_t v);
-void CrossProduct(vec3_t v1, vec3_t v2, vec3_t cross);
+void AddPointToBounds(const vec3_t v, vec3_t mins, vec3_t maxs);
+int VectorCompare(const vec3_t v1, const vec3_t v2);
+vec_t VectorLength(const vec3_t v);
+void CrossProduct(const vec3_t v1, const vec3_t v2, vec3_t cross);
 vec_t VectorNormalize(vec3_t v); /* returns vector length */
-vec_t VectorNormalize2(vec3_t v, vec3_t out);
+vec_t VectorNormalize2(const vec3_t v, vec3_t out);
 void VectorInverse(vec3_t v);
-void VectorScale(vec3_t in, vec_t scale, vec3_t out);
+void VectorScale(const vec3_t in, const vec_t scale, vec3_t out);
 int Q_log2(int val);
 
-void R_ConcatRotations(float in1[3][3], float in2[3][3], float out[3][3]);
-void R_ConcatTransforms(float in1[3][4], float in2[3][4], float out[3][4]);
+void R_ConcatRotations(const float in1[3][3], const float in2[3][3], float out[3][3]);
+void R_ConcatTransforms(const float in1[3][4], const float in2[3][4], float out[3][4]);
 
-void AngleVectors(vec3_t angles, vec3_t forward, vec3_t right, vec3_t up);
-void AngleVectors2(vec3_t value1, vec3_t angles);
-int BoxOnPlaneSide(vec3_t emins, vec3_t emaxs, struct cplane_s *plane);
+void AngleVectors(const vec3_t angles, vec3_t forward, vec3_t right, vec3_t up);
+void AngleVectors2(const vec3_t value1, vec3_t angles);
+int BoxOnPlaneSide(const vec3_t emins, const vec3_t emaxs, const struct cplane_s *p);
 float anglemod(float a);
 float LerpAngle(float a2, float a1, float frac);
 
@@ -206,23 +206,25 @@ float LerpAngle(float a2, float a1, float frac);
 
 void ProjectPointOnPlane(vec3_t dst, const vec3_t p, const vec3_t normal);
 void PerpendicularVector(vec3_t dst, const vec3_t src);
-void RotatePointAroundVector(vec3_t dst, const vec3_t dir,
-		const vec3_t point, float degrees);
+void RotatePointAroundVector(vec3_t dst,
+		const vec3_t dir,
+		const vec3_t point,
+		float degrees);
 
 /* ============================================= */
 
-char *COM_SkipPath(char *pathname);
-void COM_StripExtension(char *in, char *out);
-void COM_FileBase(char *in, char *out);
+const char *COM_SkipPath(const char *pathname);
+void COM_StripExtension(const char *in, char *out);
+void COM_FileBase(const char *in, char *out);
 void COM_FilePath(const char *in, char *out);
 void COM_DefaultExtension(char *path, const char *extension);
 
-char *COM_Parse(char **data_p);
+const char *COM_Parse(char **data_p);
 
 /* data is an in/out parm, returns a parsed out token */
-void Com_sprintf(char *dest, int size, char *fmt, ...);
+void Com_sprintf(char *dest, int size, const char *fmt, ...);
 
-void Com_PageInMemory(byte *buffer, int size);
+void Com_PageInMemory(const byte *buffer, int size);
 
 /* ============================================= */
 
@@ -244,7 +246,7 @@ float BigFloat(float l);
 float LittleFloat(float l);
 
 void Swap_Init(void);
-char *va(char *format, ...);
+char *va(const char *format, ...)  PRINTF_ATTR(1, 2);
 
 /* ============================================= */
 
@@ -253,10 +255,18 @@ char *va(char *format, ...);
 #define MAX_INFO_VALUE 64
 #define MAX_INFO_STRING 512
 
-char *Info_ValueForKey(char *s, char *key);
-void Info_RemoveKey(char *s, char *key);
-void Info_SetValueForKey(char *s, char *key, char *value);
-qboolean Info_Validate(char *s);
+char *Info_ValueForKey(const char *s, const char *key);
+void Info_RemoveKey(char *s, const char *key);
+void Info_SetValueForKey(char *s, const char *key, const char *value);
+qboolean Info_Validate(const char *s);
+
+/* ============================================= */
+
+/* Random number generator */
+int randk(void);
+float frandk(void);
+float crandk(void);
+void randk_seed(void);
 
 /*
  * ==============================================================
@@ -269,8 +279,8 @@ qboolean Info_Validate(char *s);
 extern int curtime; /* time returned by last Sys_Milliseconds */
 
 int Sys_Milliseconds(void);
-void Sys_Mkdir(char *path);
-void Sys_Rmdir(char *path);
+void Sys_Mkdir(const char *path);
+void Sys_Rmdir(const char *path);
 char *strlwr(char *s);
 
 /* large block stack allocation routines */
@@ -287,13 +297,13 @@ int Hunk_End(void);
 #define SFF_SYSTEM 0x10
 
 /* pass in an attribute mask of things you wish to REJECT */
-char *Sys_FindFirst(char *path, unsigned musthave, unsigned canthave);
+char *Sys_FindFirst(const char *path, unsigned musthave, unsigned canthave);
 char *Sys_FindNext(unsigned musthave, unsigned canthave);
 void Sys_FindClose(void);
 
 /* this is only here so the functions in q_shared.c and q_shwin.c can link */
-void Sys_Error(char *error, ...);
-void Com_Printf(char *msg, ...);
+void Sys_Error(const char *error, ...);
+void Com_Printf(const char *msg, ...);
 
 /*
  * ==========================================================
@@ -407,7 +417,7 @@ typedef struct cplane_s
 	vec3_t normal;
 	float dist;
 	byte type; /* for fast side tests */
-	byte signbits; /* signx + (signy<<1) + (signz<<1) */
+	byte signbits; /* signx + (signy<<1) + (signz<<2) */
 	byte pad[2];
 } cplane_t;
 
@@ -477,9 +487,9 @@ typedef enum
 #define PMF_NO_PREDICTION 64    /* temporarily disables prediction (used for grappling hook) */
 
 /* this structure needs to be communicated bit-accurate/
-   from the server to the client to guarantee that 
-   prediction stays in sync, so no floats are used. 
-   if any part of the game code modifies this struct, it 
+   from the server to the client to guarantee that
+   prediction stays in sync, so no floats are used.
+   if any part of the game code modifies this struct, it
    will result in a prediction error of some degree. */
 typedef struct
 {
@@ -490,7 +500,7 @@ typedef struct
 	byte pm_flags;              /* ducked, jump_held, etc */
 	byte pm_time;               /* each unit = 8 ms */
 	short gravity;
-	short delta_angles[3];      /* add to command angles to get view direction 
+	short delta_angles[3];      /* add to command angles to get view direction
 								   changed by spawns, rotating objects, and teleporters */
 } pmove_state_t;
 
@@ -535,12 +545,12 @@ typedef struct
 
 	/* callbacks to test the world */
 	trace_t (*trace)(vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end);
-	int (*pointcontents)(vec3_t point);
+	int (*pointcontents)(const vec3_t point);
 } pmove_t;
 
-/* entity_state_t->effects 
+/* entity_state_t->effects
    Effects are things handled on the client side (lights, particles,
-   frame animations)  that happen constantly on the given entity. 
+   frame animations)  that happen constantly on the given entity.
    An entity that has effects will be sent to the client even if
    it has a zero index model. */
 #define EF_ROTATE 0x00000001                /* rotate (bonus items) */
@@ -799,7 +809,7 @@ typedef struct
 #define MZ2_WIDOW_DISRUPTOR 148
 #define MZ2_WIDOW_BLASTER 149
 #define MZ2_WIDOW_RAIL 150
-#define MZ2_WIDOW_PLASMABEAM 151 
+#define MZ2_WIDOW_PLASMABEAM 151
 #define MZ2_CARRIER_MACHINEGUN_L2 152
 #define MZ2_CARRIER_MACHINEGUN_R2 153
 #define MZ2_WIDOW_RAIL_LEFT 154
@@ -862,9 +872,9 @@ typedef struct
 
 extern vec3_t monster_flash_offset[];
 
-/* Temp entity events are for things that happen 
-   at a location seperate from any existing entity. 
-   Temporary entity messages are explicitly constructed 
+/* Temp entity events are for things that happen
+   at a location seperate from any existing entity.
+   Temporary entity messages are explicitly constructed
    and broadcast. */
 typedef enum
 {
@@ -935,7 +945,7 @@ typedef enum
 #define SPLASH_BLOOD 6
 
 /* sound channels:
-   channel 0 never willingly overrides 
+   channel 0 never willingly overrides
    other channels (1-7) allways override
    a playing sound on that channel */
 #define CHAN_AUTO 0
@@ -1018,8 +1028,8 @@ typedef enum
 #define ANGLE2SHORT(x) ((int)((x) * 65536 / 360) & 65535)
 #define SHORT2ANGLE(x) ((x) * (360.0 / 65536))
 
-/* config strings are a general means of communication from 
-   the server to all connected clients. Each config string 
+/* config strings are a general means of communication from
+   the server to all connected clients. Each config string
    can be at most MAX_QPATH characters. */
 #define CS_NAME 0
 #define CS_CDTRACK 1
@@ -1043,9 +1053,9 @@ typedef enum
 
 /* ============================================== */
 
-/* entity_state_t->event values 
-   entity events are for effects that take place reletive 
-   to an existing entities origin.  Very network efficient. 
+/* entity_state_t->event values
+   entity events are for effects that take place reletive
+   to an existing entities origin.  Very network efficient.
    All muzzle flashes really should be converted to events... */
 typedef enum
 {
@@ -1059,8 +1069,8 @@ typedef enum
 	EV_OTHER_TELEPORT
 } entity_event_t;
 
-/* entity_state_t is the information conveyed from the server 
-   in an update message about entities that the client will 
+/* entity_state_t is the information conveyed from the server
+   in an update message about entities that the client will
    need to render in some way */
 typedef struct entity_state_s
 {
@@ -1073,7 +1083,7 @@ typedef struct entity_state_s
 	int modelindex2, modelindex3, modelindex4;      /* weapons, CTF flags, etc */
 	int frame;
 	int skinnum;
-	unsigned int effects;   
+	unsigned int effects;
 	int renderfx;
 	int solid;              /* for client side prediction, 8*(bits 0-4) is x/y radius */
 							/* 8*(bits 5-9) is z down distance, 8(bits10-15) is z up */
@@ -1086,9 +1096,9 @@ typedef struct entity_state_s
 
 /* ============================================== */
 
-/* player_state_t is the information needed in addition to pmove_state_t 
-   to rendered a view.  There will only be 10 player_state_t sent each second, 
-   but the number of pmove_state_t changes will be reletive to client 
+/* player_state_t is the information needed in addition to pmove_state_t
+   to rendered a view.  There will only be 10 player_state_t sent each second,
+   but the number of pmove_state_t changes will be reletive to client
    frame rates */
 typedef struct
 {
@@ -1110,12 +1120,6 @@ typedef struct
 
 	short stats[MAX_STATS];     /* fast status bar updates */
 } player_state_t;
-
-#define VIDREF_GL 1
-#define VIDREF_SOFT 2
-#define VIDREF_OTHER 3
-
-extern int vidref_val;
 
 size_t verify_fread(void *, size_t, size_t, FILE *);
 size_t verify_fwrite(void *, size_t, size_t, FILE *);

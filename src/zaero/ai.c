@@ -2,10 +2,8 @@
 
 #define Z_RADUISLISTSIZE	2000
 
-void ai_run_melee(edict_t *self);
-qboolean FindTarget (edict_t *self);
+qboolean FindTarget(edict_t *self);
 qboolean SV_StepDirection (edict_t *ent, float yaw, float dist);
-void SV_NewChaseDir (edict_t *actor, vec3_t eOrigin, float dist);
 
 /*
 =============
@@ -55,7 +53,7 @@ void zCreateRaduisList(edict_t *self)
 =============
 zSchoolAllVisiable
 
-Create list of monsters of the same schooling type that are ahead of you. 
+Create list of monsters of the same schooling type that are ahead of you.
 ==============
 */
 int zSchoolAllVisiable(edict_t *self)
@@ -76,7 +74,7 @@ int zSchoolAllVisiable(edict_t *self)
 
 	while (head)
 	{
-		if(strcmp(head->classname, self->classname) == 0 && (self->monsterinfo.aiflags & AI_SCHOOLING) && (head->health > 0) && 
+		if(strcmp(head->classname, self->classname) == 0 && (self->monsterinfo.aiflags & AI_SCHOOLING) && (head->health > 0) &&
 			(head->zDistance <= self->monsterinfo.zSchoolSightRadius) && (visible(self, head)) && (infront(self, head)))
 		{
 			list->zSchoolChain = head;
@@ -100,7 +98,7 @@ Check direction moving in does not hit a wall... if it does change direction.
 */
 int zFindRoamYaw(edict_t *self, float distcheck)
 {
-	vec3_t	forward, end, angles;
+	vec3_t	forward, end;
 	trace_t	tr;
 	float current;
 
@@ -119,10 +117,10 @@ int zFindRoamYaw(edict_t *self, float distcheck)
 		}
 	}
 
-	AngleVectors (self->s.angles, forward, NULL, NULL);
-	VectorMA (self->s.origin, distcheck, forward, end);
+	AngleVectors(self->s.angles, forward, NULL, NULL);
+	VectorMA(self->s.origin, distcheck, forward, end);
 
-	tr = gi.trace (self->s.origin, self->mins, self->maxs, end, self, MASK_SOLID);
+	tr = gi.trace(self->s.origin, self->mins, self->maxs, end, self, MASK_SOLID);
 
 	if (tr.fraction < 1.0)
 	{
@@ -135,6 +133,7 @@ int zFindRoamYaw(edict_t *self, float distcheck)
 		{
 			float dir = random() > 0.5 ? -45 : 45;
 			float maxtrys = 100;
+			vec3_t angles;
 
 			VectorCopy(self->s.angles, angles);
 
@@ -145,10 +144,10 @@ int zFindRoamYaw(edict_t *self, float distcheck)
 				self->ideal_yaw = self->ideal_yaw + (random() * dir);
 
 				angles[YAW] = anglemod (self->ideal_yaw);
-				AngleVectors (angles, forward, NULL, NULL);
-				VectorMA (self->s.origin, distcheck, forward, end);
+				AngleVectors(angles, forward, NULL, NULL);
+				VectorMA(self->s.origin, distcheck, forward, end);
 
-				tr = gi.trace (self->s.origin, self->mins, self->maxs, end, self, MASK_SOLID);
+				tr = gi.trace(self->s.origin, self->mins, self->maxs, end, self, MASK_SOLID);
 				maxtrys--;
 			}
 		}
@@ -163,10 +162,11 @@ int zFindRoamYaw(edict_t *self, float distcheck)
 =============
 zSchoolMonsters
 
-Roaming schooling ai. 
+Roaming schooling ai.
 ==============
 */
-int zSchoolMonsters(edict_t *self, float dist, int runStyle, float *currentSpeed)
+static int
+zSchoolMonsters(edict_t *self, int runStyle, float *currentSpeed)
 {
 	int maxInsight;
 	int newRunStyle;
@@ -183,7 +183,7 @@ int zSchoolMonsters(edict_t *self, float dist, int runStyle, float *currentSpeed
 	{
 		float totalSpeed;
 		float totalBearing;
-		float distanceToNearest, distanceToLeader, dist;
+		float distanceToNearest, distanceToLeader;
 		edict_t *nearestEntity = 0, *list;
 		vec3_t vec;
 
@@ -195,22 +195,24 @@ int zSchoolMonsters(edict_t *self, float dist, int runStyle, float *currentSpeed
 
 		while(list)
 		{
+			float dist_len;
+
 			// Gather data on those you see
 			totalSpeed += list->speed;
 			totalBearing += anglemod(list->s.angles[YAW]);
 
 			VectorSubtract(self->s.origin, list->s.origin, vec);
-			dist = VectorLength(vec);
+			dist_len = VectorLength(vec);
 
-			if(dist < distanceToNearest)
+			if (dist_len < distanceToNearest)
 			{
-				distanceToNearest = dist;
+				distanceToNearest = dist_len;
 				nearestEntity = list;
 			}
 
-			if(dist > distanceToLeader)
+			if (dist_len > distanceToLeader)
 			{
-				distanceToLeader = dist;
+				distanceToLeader = dist_len;
 			}
 
 			list = list->zSchoolChain;
@@ -235,7 +237,7 @@ int zSchoolMonsters(edict_t *self, float dist, int runStyle, float *currentSpeed
 
 	}
 	else
-	{	
+	{
 		//You are in front, so slow down a bit
 		edict_t *head;
 
@@ -250,7 +252,7 @@ int zSchoolMonsters(edict_t *self, float dist, int runStyle, float *currentSpeed
 
 		while (head)
 		{
-			if(strcmp(head->classname, self->classname) == 0 && (head->health > 0) && 
+			if(strcmp(head->classname, self->classname) == 0 && (head->health > 0) &&
 			(head->zDistance <= self->monsterinfo.zSchoolSightRadius) && (visible(self, head)))
 
 			{
@@ -296,7 +298,7 @@ int zSchoolMonsters(edict_t *self, float dist, int runStyle, float *currentSpeed
 			*currentSpeed = (self->speed - self->monsterinfo.zSpeedStandMax) + 1;
 		}
 	}
-	else 
+	else
 	{
 		newRunStyle = 2;
 
@@ -347,21 +349,21 @@ void ai_schoolStand (edict_t *self, float dist)
 	else
 	{
 		// run schooling routines
-		switch(zSchoolMonsters(self, dist, 0, &speed))
+		switch(zSchoolMonsters(self, 0, &speed))
 		{
 			case 1:
-				self->monsterinfo.walk (self);
+				self->monsterinfo.walk(self);
 				break;
 
 			case 2:
-				self->monsterinfo.run (self);
+				self->monsterinfo.run(self);
 				break;
 		}
 	}
 
 	// do the normal stand stuff
 	if (dist)
-	M_walkmove (self, self->ideal_yaw, dist);
+	M_walkmove(self, self->ideal_yaw, dist);
 }
 
 /*
@@ -397,14 +399,14 @@ void ai_schoolRun (edict_t *self, float dist)
 	else
 	{
 		// run schooling routines
-		switch(zSchoolMonsters(self, dist, 2, &speed))
+		switch(zSchoolMonsters(self, 2, &speed))
 		{
 			case 0:
-				self->monsterinfo.stand (self);
+				self->monsterinfo.stand(self);
 				break;
 
 			case 1:
-				self->monsterinfo.walk (self);
+				self->monsterinfo.walk(self);
 				break;
 		}
 	}
@@ -446,14 +448,14 @@ void ai_schoolWalk (edict_t *self, float dist)
 	else
 	{
 		// run schooling routines
-		switch(zSchoolMonsters(self, dist, 1, &speed))
+		switch(zSchoolMonsters(self, 1, &speed))
 		{
 			case 0:
-				self->monsterinfo.stand (self);
+				self->monsterinfo.stand(self);
 				break;
 
 			case 2:
-				self->monsterinfo.run (self);
+				self->monsterinfo.run(self);
 				break;
 		}
 	}
